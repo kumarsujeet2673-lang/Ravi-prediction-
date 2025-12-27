@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ravi Prediction Tool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;font-family:monospace;}
+body{
+margin:0;
+background:black;
+color:#00ff99;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+}
+canvas{position:fixed;top:0;left:0;z-index:-1;}
+
+.panel{width:95%;max-width:420px;display:none;}
+
+.card{
+background:rgba(0,0,0,0.75);
+border:1px solid #00ff99;
+border-radius:15px;
+padding:18px;
+margin-bottom:12px;
+text-align:center;
+}
+
+.big{font-size:32px;}
+.yellow{color:#ffee58;}
+.blue{color:#00e5ff;}
+
+.header{text-align:center;margin-bottom:15px;}
+.header h1{margin:0;font-size:22px;}
+.header p{margin:5px 0;color:#ffee58;}
+
+#loginBox{
+background:rgba(0,0,0,0.85);
+border:1px solid #00ff99;
+border-radius:15px;
+padding:25px;
+width:90%;
+max-width:360px;
+text-align:center;
+}
+input,button{
+width:100%;
+padding:12px;
+border-radius:8px;
+margin-top:10px;
+font-size:16px;
+}
+button{
+background:#00ff99;
+color:black;
+border:none;
+font-weight:bold;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<!-- LOGIN -->
+<div id="loginBox">
+<h2>ADMIN LOGIN 🔐</h2>
+<input type="password" id="pass" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+<div id="err"></div>
+</div>
+
+<!-- PANEL -->
+<div class="panel" id="panel">
+
+<div class="header">
+<h1>ravi prediction tool 🔥</h1>
+<p>98% accuracy</p>
+</div>
+
+<div class="card">
+Total Bets
+<div class="big" id="bets">1</div>
+</div>
+
+<div class="card">
+Current Period
+<div class="big yellow" id="period">1</div>
+</div>
+
+<div class="card">
+Time
+<div class="big blue" id="time">--:--:--</div>
+</div>
+
+<div class="card">
+Prediction
+<div class="big" id="pred">---</div>
+<div id="nums"></div>
+</div>
+
+</div>
+
+<script>
+// ===== LOGIN =====
+function login(){
+if(document.getElementById("pass").value==="ravi@123"){
+document.getElementById("loginBox").style.display="none";
+document.getElementById("panel").style.display="block";
+startSession();
+}else{
+document.getElementById("err").innerText="Wrong Password ❌";
+}
+}
+
+// ===== SESSION BET SYSTEM =====
+let bets = 1;               // OPEN = 1
+let openTime = Date.now();  // session start
+
+const PERIOD_TIME = 60000;
+
+// lifetime period
+if(!localStorage.startTime){
+localStorage.startTime = Date.now();
+}
+
+function startSession(){
+document.getElementById("bets").innerText = bets;
+setInterval(update,1000);
+}
+
+function update(){
+let now = Date.now();
+
+// TIME
+document.getElementById("time").innerText =
+new Date().toLocaleTimeString();
+
+// PERIOD (lifetime)
+let period = Math.floor((now - localStorage.startTime)/PERIOD_TIME)+1;
+period = ((period-1)%999)+1;
+document.getElementById("period").innerText = period;
+
+// BET COUNT (session only)
+let minsOpen = Math.floor((now - openTime)/PERIOD_TIME);
+document.getElementById("bets").innerText = 1 + minsOpen;
+
+// RANDOM PREDICTION (per period)
+if(minsOpen >= 0){
+let small = Math.random() < 0.5;
+if(small){
+document.getElementById("pred").innerText="SMALL";
+let a=Math.floor(Math.random()*5)+5;
+let b=Math.floor(Math.random()*5)+5;
+document.getElementById("nums").innerText="Numbers: "+a+", "+b;
+}else{
+document.getElementById("pred").innerText="BIG";
+let a=Math.floor(Math.random()*5);
+let b=Math.floor(Math.random()*5);
+document.getElementById("nums").innerText="Numbers: "+a+", "+b;
+}
+}
+}
+
+// ===== MATRIX BG =====
+const c=document.getElementById("matrix");
+const ctx=c.getContext("2d");
+c.width=innerWidth;
+c.height=innerHeight;
+const chars="01";
+const drops=Array(Math.floor(c.width/20)).fill(1);
+
+setInterval(()=>{
+ctx.fillStyle="rgba(0,0,0,0.05)";
+ctx.fillRect(0,0,c.width,c.height);
+ctx.fillStyle="#00ff99";
+ctx.font="16px monospace";
+for(let i=0;i<drops.length;i++){
+let t=chars[Math.floor(Math.random()*chars.length)];
+ctx.fillText(t,i*20,drops[i]*20);
+if(drops[i]*20>c.height && Math.random()>0.98)drops[i]=0;
+drops[i]++;
+}
+},50);
+</script>
+
+</body>
+</html>
